@@ -1,20 +1,48 @@
 import azure.durable_functions as df
 from datetime import timedelta
+import logging
 
-async def main(context):
-    event_uid = context.get_input()  # Si tu versión soporta get_input()
-    
-    retry_options = df.RetryOptions(5000, 3)
+async def main(context: df.DurableOrchestrationContext):
+    """
+    Función de orquestador que llama repetidamente a una función de actividad.
+    Utiliza la sintaxis async/await para una ejecución correcta.
+    """
+    logging.info("Starting orchestration for TakeAttendanceOrchestator.")
 
-    while True:
-        should_continue = await context.call_activity_with_retry(
-            'CallLaravelApi', retry_options, event_uid
-        )
-        if not should_continue:
-            break
+    try:
+        # Usa el método get_input() para obtener el input de forma segura.
+        event_uid = context.get_input()
+        if not event_uid:
+            logging.error("No eventUID found in orchestration input.")
+            return {"status": "error", "message": "No eventUID provided."}
 
-        await context.create_timer(
-            context.current_utc_datetime + timedelta(seconds=10)
-        )
+        # Define las opciones de reintento. El host de Durable Functions
+        # manejará los reintentos automáticamente.
+        # Primer reintento después de 5 segundos, hasta 3 veces en total.
+        retry_options = df.RetryOptions(first_retry_interval_in_milliseconds=5000, max_number_of_attempts=3)
+        
+        while True:
+            # Llama a la actividad con reintentos
+            # Si CallLaravelApi falla, el reintento se manejará automáticamente.
+            should_continue = await context.call_activity_with_retry(
+                'CallLaravelApi', retry_options, event_uid
+            )
 
-    return "Attendance task completed."
+            if not should_continue:
+                # Si la actividad devuelve un valor que evalúa a False,
+                # salimos del bucle
+                logging.info("Activity returned False. Exiting loop.")
+                break
+
+            # Crea un temporizador para esperar 10 segundos antes de la siguiente iteración
+            await context.create_timer(
+                context.current_utc_datetime + timedelta(seconds=10)
+            )
+
+    except Exception as e:
+        # Captura cualquier error no manejado y lo registra
+        logging.error(f"Orchestrator failed with an unexpected error: {e}")
+        return {"status": "error", "message": f"Orchestrator failed: {e}"}
+
+    # Retorna un diccionario serializable a JSON para evitar errores
+    return {"status": "completed", "message": "Attendance task completed successfully."}
