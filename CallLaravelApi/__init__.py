@@ -1,16 +1,13 @@
 import logging
 import os
 import requests
-import azure.functions as func
-import json
 
 def main(event_uid: str) -> bool:
-
-    logging.info(f"Calling Laravel endpoint for attendance with UID: {event_uid}")
+    logging.info(f"Llamando al endpoint Laravel con UID: {event_uid}")
 
     admin_domain = os.environ.get("ADMIN_DOMAIN")
     if not admin_domain:
-        logging.error("ADMIN_DOMAIN is not set.")
+        logging.error("ADMIN_DOMAIN no está definido")
         return False
 
     try:
@@ -19,10 +16,9 @@ def main(event_uid: str) -> bool:
         response.raise_for_status()
 
         data = response.json()
-        logging.info(f"Laravel response: {data}")
-
+        logging.info(f"Respuesta Laravel: {data}")
         return data.get("should_continue", False)
 
     except requests.exceptions.RequestException as e:
-        logging.error(f"Error calling Laravel API: {e}")
+        logging.error(f"Error al llamar Laravel API: {e}")
         return False

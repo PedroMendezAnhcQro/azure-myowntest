@@ -3,20 +3,20 @@
   "bindings": [
     {
       "authLevel": "function",
-      "name": "req",
       "type": "httpTrigger",
       "direction": "in",
+      "name": "req",
       "methods": ["post"]
     },
     {
-      "name": "starter",
       "type": "durableClient",
-      "direction": "in"
+      "direction": "in",
+      "name": "starter"
     },
     {
-      "name": "$return",
       "type": "http",
-      "direction": "out"
+      "direction": "out",
+      "name": "$return"
     }
   ]
 }

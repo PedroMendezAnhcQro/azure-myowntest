@@ -1,9 +1,9 @@
 import azure.durable_functions as df
 from datetime import timedelta
 
-async def main(context: df.DurableOrchestrationContext):
-    event_uid = context.get_input()
-
+async def main(context):
+    event_uid = context.get_input()  # Si tu versión soporta get_input()
+    
     retry_options = df.RetryOptions(5000, 3)
 
     while True:

@@ -16,13 +16,8 @@ async def main(req: func.HttpRequest, starter: str) -> func.HttpResponse:
     if not event_uid:
         return func.HttpResponse("No se ha enviado el eventUID", status_code=400)
 
-    # Crear el cliente de orquestación usando el starter string
     client = df.DurableOrchestrationClient(starter)
-
-    # Iniciar la orquestación
-    instance_id = await client.start_new('TakeAttendanceOrchestator', None, event_uid)
+    instance_id = await client.start_new("TakeAttendanceOrchestator", None, event_uid)
 
     logging.info(f"Started orchestration with ID = '{instance_id}'.")
-
-    # Devolver respuesta de seguimiento
     return client.create_check_status_response(req, instance_id)
