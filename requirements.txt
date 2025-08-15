@@ -2,5 +2,5 @@
 # Ref: aka.ms/functions-azure-monitor-python 
 # azure-monitor-opentelemetry 
 
-azure-functions-durable>=2.0.0
+azure-functions-durable
 azure-functions
