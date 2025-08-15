@@ -13,6 +13,8 @@ async def main(req: func.HttpRequest, starter: str) -> func.HttpResponse:
             req_body = {}
         event_uid = req_body.get('eventUID')
 
+    logging.info(f"Started orchestration with ID = '{instance_id}'.")
+
     if not event_uid:
         return func.HttpResponse("No se ha enviado el eventUID", status_code=400)
 

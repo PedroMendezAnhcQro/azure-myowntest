@@ -45,4 +45,4 @@ async def main(context: df.DurableOrchestrationContext):
         return {"status": "error", "message": f"Orchestrator failed: {e}"}
 
     # Retorna un diccionario serializable a JSON para evitar errores
-    return {"status": "completed", "message": "Attendance task completed successfully."}
+    return "a"
