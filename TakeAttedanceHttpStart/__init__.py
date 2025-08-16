@@ -12,8 +12,7 @@ async def main(req: func.HttpRequest, starter: str) -> func.HttpResponse:
         except ValueError:
             req_body = {}
         event_uid = req_body.get('eventUID')
-
-    logging.info(f"Started orchestration with ID = '{instance_id}'.")
+    logging.info(f"Param received = '{event_uid}'.")
 
     if not event_uid:
         return func.HttpResponse("No se ha enviado el eventUID", status_code=400)
