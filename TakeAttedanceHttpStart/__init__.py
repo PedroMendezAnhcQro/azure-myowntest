@@ -18,6 +18,7 @@ async def main(req: func.HttpRequest, starter: str) -> func.HttpResponse:
         return func.HttpResponse("No se ha enviado el eventUID", status_code=400)
 
     client = df.DurableOrchestrationClient(starter)
+    event_uid_str = str(event_uid)
     instance_id = await client.start_new("TakeAttendanceOrchestator", None, event_uid)
 
     logging.info(f"Started orchestration with ID = '{instance_id}'.")

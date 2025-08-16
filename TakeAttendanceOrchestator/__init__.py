@@ -1,17 +1,16 @@
 import azure.durable_functions as df
 from datetime import timedelta
 import logging
+import json
 
-async def main(context: df.DurableOrchestrationContext):
-    """
-    Función de orquestador que llama repetidamente a una función de actividad.
-    Utiliza la sintaxis async/await para una ejecución correcta.
-    """
-    logging.info("Starting orchestration for TakeAttendanceOrchestator.")
+async def main(context):
 
     try:
-        # Usa el método get_input() para obtener el input de forma segura.
-        event_uid = context.get_input()
+        # Alv todo esto namas porque lo guarda como un json string qpp
+        body_string = context._OrchestrationContext__body
+        body_dict = json.loads(body_string)
+        event_uid = json.loads(body_dict['input'])
+
         if not event_uid:
             logging.error("No eventUID found in orchestration input.")
             return {"status": "error", "message": "No eventUID provided."}
@@ -42,7 +41,7 @@ async def main(context: df.DurableOrchestrationContext):
     except Exception as e:
         # Captura cualquier error no manejado y lo registra
         logging.error(f"Orchestrator failed with an unexpected error: {e}")
-        return {"status": "error", "message": f"Orchestrator failed: {e}"}
+        return json.dumps({"status": "error", "message": f"Orchestrator failed: {e}"})
 
     # Retorna un diccionario serializable a JSON para evitar errores
-    return "a"
+    return json.dumps("a")
