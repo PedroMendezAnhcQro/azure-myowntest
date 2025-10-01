@@ -1,13 +1,12 @@
 import logging
 import os
-import requests
-from datetime import timedelta
+import requests 
+from datetime import datetime, timezone, timedelta
 import azure.functions as func
 import azure.durable_functions as df
 
 app = df.DFApp(http_auth_level=func.AuthLevel.FUNCTION)
 
-# 1️⃣ HTTP STARTER
 @app.route(route="takeattendance")
 @app.durable_client_input(client_name="client")
 async def http_start(req: func.HttpRequest, client: df.DurableOrchestrationClient):
@@ -25,13 +24,12 @@ async def http_start(req: func.HttpRequest, client: df.DurableOrchestrationClien
 
     if not event_uid:
         return func.HttpResponse("No se ha enviado el eventUID", status_code=400)
-
-    instance_id = await client.start_new("TakeAttendanceOrchestator", event_uid, event_uid)
+    custom_id = f"{event_uid}-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}"
+    instance_id = await client.start_new("TakeAttendanceOrchestator", custom_id, event_uid)
     logging.info(f"Started orchestration with ID = '{instance_id}'.")
     return client.create_check_status_response(req, instance_id)
 
 
-# 2️⃣ ORCHESTRATOR
 @app.orchestration_trigger(context_name="context")
 def TakeAttendanceOrchestator(context: df.DurableOrchestrationContext):
     event_uid = context.get_input()
@@ -54,7 +52,6 @@ def TakeAttendanceOrchestator(context: df.DurableOrchestrationContext):
     return {"status": "ok", "message": "Orchestration finished"}
 
 
-# 3️⃣ ACTIVITY
 @app.activity_trigger(input_name="event_uid")
 def CallLaravelApi(event_uid: str) -> bool:
     logging.info(f"Llamando al endpoint Laravel con UID: {event_uid}")
